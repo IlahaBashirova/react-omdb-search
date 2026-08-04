@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import SearchBar from './components/SearchBar';
 import ResultsList from './components/ResultsList';
 import Pagination from './components/Pagination';
 import './App.css';
+
+const API_KEY = import.meta.env.VITE_OMDB_API_KEY;
 
 function App() {
   const [query, setQuery] = useState('');
@@ -10,8 +12,38 @@ function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  useEffect(() => {
+    if (!query) {
+      setResults([]);
+      setTotalPages(1);
+      return;
+    }
+
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          `https://www.omdbapi.com/?apikey=${API_KEY}&s=${query}&page=${currentPage}`
+        );
+        const data = await response.json();
+
+        if (data.Response === 'True') {
+          setResults(data.Search);
+          setTotalPages(Math.ceil(Number(data.totalResults) / 10));
+        } else {
+          setResults([]);
+          setTotalPages(1);
+        }
+      } catch (error) {
+        console.error('Sorğu zamanı xəta:', error);
+      }
+    };
+
+    fetchData();
+  }, [query, currentPage]);
+
   const handleSearch = (value) => {
     setQuery(value);
+    setCurrentPage(1);
   };
 
   const handlePageChange = (page) => {

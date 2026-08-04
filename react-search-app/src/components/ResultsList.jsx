@@ -8,7 +8,7 @@ function ResultsList({ items }) {
   return (
     <div className="results-list">
       {items.map((item) => (
-        <Card key={item.id} item={item} />
+        <Card key={item.imdbID} item={item} />
       ))}
     </div>
   );
