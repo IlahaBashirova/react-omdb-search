@@ -8,12 +8,22 @@ const API_KEY = import.meta.env.VITE_OMDB_API_KEY;
 
 function App() {
   const [query, setQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [results, setResults] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    if (!query) {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(query);
+      setCurrentPage(1);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  useEffect(() => {
+    if (!debouncedQuery) {
       setResults([]);
       setTotalPages(1);
       return;
@@ -22,7 +32,7 @@ function App() {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `https://www.omdbapi.com/?apikey=${API_KEY}&s=${query}&page=${currentPage}`
+          `https://www.omdbapi.com/?apikey=${API_KEY}&s=${debouncedQuery}&page=${currentPage}`
         );
         const data = await response.json();
 
@@ -39,11 +49,10 @@ function App() {
     };
 
     fetchData();
-  }, [query, currentPage]);
+  }, [debouncedQuery, currentPage]);
 
   const handleSearch = (value) => {
     setQuery(value);
-    setCurrentPage(1);
   };
 
   const handlePageChange = (page) => {
