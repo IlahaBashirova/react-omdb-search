@@ -12,6 +12,8 @@ function App() {
   const [results, setResults] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -26,15 +28,36 @@ function App() {
     if (!debouncedQuery) {
       setResults([]);
       setTotalPages(1);
+      setError(null);
       return;
     }
 
+    const controller = new AbortController();
+    let ignore = false;
+
     const fetchData = async () => {
+      setIsLoading(true);
+      setError(null);
+
       try {
         const response = await fetch(
-          `https://www.omdbapi.com/?apikey=${API_KEY}&s=${debouncedQuery}&page=${currentPage}`
+          `https://www.omdbapi.com/?apikey=${API_KEY}&s=${debouncedQuery}&page=${currentPage}`,
+          { signal: controller.signal }
         );
         const data = await response.json();
+
+        if (ignore) return;
+
+        if (!response.ok) {
+          if (data.Error && data.Error.toLowerCase().includes('limit')) {
+            setError('Günlük sorğu limiti bitib. Sabah yenidən cəhd edin.');
+          } else {
+            setError('API açarı ilə bağlı problem var. Açarı yoxlayın.');
+          }
+          setResults([]);
+          setTotalPages(1);
+          return;
+        }
 
         if (data.Response === 'True') {
           setResults(data.Search);
@@ -43,12 +66,23 @@ function App() {
           setResults([]);
           setTotalPages(1);
         }
-      } catch (error) {
-        console.error('Sorğu zamanı xəta:', error);
+      } catch (err) {
+        if (err.name === 'AbortError') return; 
+        if (!ignore) {
+          setError('Şəbəkə xətası baş verdi. İnternet bağlantınızı yoxlayın.');
+          setResults([]);
+        }
+      } finally {
+        if (!ignore) setIsLoading(false);
       }
     };
 
     fetchData();
+
+    return () => {
+      ignore = true;
+      controller.abort();
+    };
   }, [debouncedQuery, currentPage]);
 
   const handleSearch = (value) => {
@@ -63,7 +97,13 @@ function App() {
     <div className="app">
       <h1>Axtarış Tətbiqi</h1>
       <SearchBar onSearch={handleSearch} />
-      <ResultsList items={results} />
+
+      {isLoading && <p className="loading">Yüklənir...</p>}
+
+      {error && !isLoading && <p className="error">{error}</p>}
+
+      {!isLoading && !error && <ResultsList items={results} />}
+
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}

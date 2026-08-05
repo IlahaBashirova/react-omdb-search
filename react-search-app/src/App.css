@@ -182,3 +182,14 @@
     border-right-color: var(--border);
   }
 }
+
+.loading {
+  color: #555;
+  font-style: italic;
+}
+
+.error {
+  color: #c0392b;
+  font-weight: bold;
+}
+
