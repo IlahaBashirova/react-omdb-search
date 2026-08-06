@@ -1,16 +1,38 @@
-# React + Vite
+# Movie Search App
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A React application built with Vite that connects to the OMDb open REST API to search for movies. It includes debounced search, separate loading/error/empty states, race-condition protection, and pagination.
 
-Currently, two official plugins are available:
+Built as part of a weekly React internship task.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- Search movies via the OMDb REST API
+- Debounced search input (500ms) — avoids firing an API call on every keystroke
+- Race condition protection using `AbortController` — stale/outdated requests are cancelled so they can't overwrite newer results
+- Loading, error, and empty states handled and displayed separately
+- Pagination with total results count, disabled controls while loading
+- API logic extracted into a reusable custom hook (`useMovieSearch`)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech Stack
 
-## Expanding the Oxlint configuration
+- React 18 + Vite
+- OMDb API (native `fetch`)
+- Plain CSS (no UI framework)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+This project was scaffolded using Vite's official React template (`npm create vite@latest -- --template react`) and then built out feature by feature to meet the task requirements.
+
+## Project Structure
+
+```
+src/
+  components/
+    SearchBar.jsx
+    Card.jsx
+    ResultsList.jsx
+    Pagination.jsx
+  hooks/
+    useMovieSearch.js
+  App.jsx
+  App.css
+  main.jsx
+```
