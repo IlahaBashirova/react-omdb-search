@@ -129,3 +129,8 @@ h1 {
   text-align: center;
 }
 
+.results-count {
+  color: #555;
+  font-size: 14px;
+  margin-top: 16px;
+}

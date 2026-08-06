@@ -1,15 +1,15 @@
-function Pagination({ currentPage, totalPages, onPageChange }) {
+function Pagination({ currentPage, totalPages, onPageChange, disabled }) {
   return (
     <div className="pagination">
       <button
-        disabled={currentPage <= 1}
+        disabled={disabled || currentPage <= 1}
         onClick={() => onPageChange(currentPage - 1)}
       >
         Geri
       </button>
       <span>{currentPage} / {totalPages}</span>
       <button
-        disabled={currentPage >= totalPages}
+        disabled={disabled || currentPage >= totalPages}
         onClick={() => onPageChange(currentPage + 1)}
       >
         İrəli

@@ -12,6 +12,7 @@ function App() {
   const [results, setResults] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalResults, setTotalResults] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -28,6 +29,7 @@ function App() {
     if (!debouncedQuery) {
       setResults([]);
       setTotalPages(1);
+      setTotalResults(0);
       setError(null);
       return;
     }
@@ -56,15 +58,18 @@ function App() {
           }
           setResults([]);
           setTotalPages(1);
+          setTotalResults(0);
           return;
         }
 
         if (data.Response === 'True') {
           setResults(data.Search);
+          setTotalResults(Number(data.totalResults));
           setTotalPages(Math.ceil(Number(data.totalResults) / 10));
         } else {
           setResults([]);
           setTotalPages(1);
+          setTotalResults(0); 
         }
       } catch (err) {
         if (err.name === 'AbortError') return; 
@@ -91,6 +96,7 @@ function App() {
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -98,17 +104,24 @@ function App() {
       <h1>Axtarış Tətbiqi</h1>
       <SearchBar onSearch={handleSearch} />
 
+      {!isLoading && !error && totalResults > 0 && (
+        <p className="results-count">{totalResults} nəticə tapıldı</p>
+      )}
+
       {isLoading && <p className="loading">Yüklənir...</p>}
 
       {error && !isLoading && <p className="error">{error}</p>}
 
       {!isLoading && !error && <ResultsList items={results} />}
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
+      {!isLoading && totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          disabled={isLoading}
+        />
+      )}
     </div>
   );
 }
